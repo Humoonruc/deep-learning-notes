@@ -1,12 +1,14 @@
 
 
 [TOC]
-
-
-
-
-
 # 神经网络与深度学习
+
+
+
+- GitHub: https://github.com/Humoonruc/deep-learning-notes
+- Pages: https://humoonruc.github.io/deep-learning-notes/
+
+<img src="http://humoon-image-hosting-service.oss-cn-beijing.aliyuncs.com/img/typora/JavaScript/image-20210607112416754.png" alt="image-20210607112416754" style="zoom:50%;" />
 
 
 
