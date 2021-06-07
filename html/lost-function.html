@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loss Function</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.7.0/d3.min.js"></script>
+</head>
+
+<body>
+  <h2 id="h2">一元 Loss Function BGD优化</h2>
+  <div id="plot" style="width:60%;height:500px;"></div>
+  <script type="module">
+
+
+    import { renderPoints } from '../src/renderRandomData.js';
+
+
+    // config
+    const scale = 1000;
+    const alpha = 0.03;
+    let w = 0.1; // 定义模型参数的初始值
+
+
+    // data
+    const points = renderPoints(scale);
+    const sumXX = d3.sum(points.map(p => p.x ** 2))
+    const sumYY = d3.sum(points.map(p => p.y ** 2))
+    const sumXY = d3.sum(points.map(p => p.x * p.y))
+
+
+    // loss function
+    const ws = d3.range(0, 3, 0.1)
+    // 每有一个参数w，就有一个均方误差S，w到S的映射就是损失函数
+    function loss(w) {
+      return (sumXX * w ** 2 - 2 * sumXY * w + sumYY) / scale;
+    }
+    const Ss = ws.map(w => loss(w))
+
+
+    // plotting
+    const plotDiv = document.querySelector('div#plot');
+    const possibleSpace = {
+      x: ws,
+      y: Ss,
+      name: '参数空间',
+      mode: 'lines',
+      marker: {
+        color: 'blue',
+        size: 0.5
+      }
+    };
+    let searchMin = {
+      x: w,
+      y: loss(w),
+      name: '参数调优',
+      mode: 'markers',
+      marker: {
+        color: 'red',
+        size: 5
+      }
+    };
+    const dataSet = [possibleSpace, searchMin];
+    const layout = {
+      title: {
+        text: `模型参数为：${d3.format(".4f")(w)}`,
+        font: {
+          family: 'Droid Sans Mono',
+          size: 24,
+        },
+        xref: 'paper',
+        x: 0,
+      },
+      legend: {
+        bgcolor: 'yellow',
+        font: {
+          color: 'black',
+          size: 14,
+        },
+      },
+      margin: {
+        t: 60,
+        b: 60,
+        pad: 10
+      },
+      paper_bgcolor: 'lightgrey',
+      plot_bgcolor: 'white',
+      xaxis: {
+        title: {
+          text: 'model parameter',
+          font: {
+            size: 20,
+          }
+        },
+        tickfont: {
+          family: 'Consolas',
+          size: 16,
+        }
+      },
+      yaxis: {
+        title: {
+          text: 'Statistics',
+          font: {
+            size: 20,
+          }
+        },
+        tickfont: {
+          family: 'Consolas',
+          size: 16,
+        }
+      }
+    };
+    Plotly.newPlot(plotDiv, dataSet, layout);
+
+
+    // BGD Adjust, BGD 收敛的速度比 SGD 快得多
+    for (let m = 0; m < 5; m++) {
+      points.forEach(p => {
+        w += -(2 / scale) * (sumXX * w - sumXY) * alpha;
+
+        searchMin = {
+          data: [{ x: [w], y: [loss(w)] }], // plotly的语法，x和y都必须是数组，不能是单个值
+          traces: [1],
+          layout: {
+            title: {
+              text: `模型参数为：${d3.format(".4f")(w)}`,
+            },
+          },
+        };
+
+        Plotly.animate(plotDiv, searchMin, {
+          transition: {
+            duration: 10,
+            easing: 'cubic-in-out'
+          },
+          frame: {
+            duration: 10
+          }
+        })
+
+      })
+    }
+
+  </script>
+</body>
+
+</html>
