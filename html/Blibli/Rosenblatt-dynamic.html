@@ -1,47 +1,33 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Activation Function</title>
+  <title>Rosenblatt 感知机 迭代过程可视化</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.7.0/d3.min.js"></script>
 </head>
 
 <body>
-  <h2 id="h2">sigmoid 激活函数, SGD 优化</h2>
+  <h2>Rosenblatt 感知机 SGD 迭代过程可视化</h2>
   <div id="plot" style="width:60%;height:500px;"></div>
   <script type="module">
+    import { renderPoints } from './renderRandomData.js';
+
 
     // config
-    const scale = 100;
-    const alpha = 0.2;
-    let w = 0.1
-    let b = 0.1
-    function sigmoid(x) {
-      return (1 / (1 + Math.exp(-x)))
-    }
+    const scale = 1000;
+    const alpha = 0.03;
+    let w = 0.5; // 定义模型参数的初始值
+
 
     // data
-    function renderPoints(scale) {
-      const points = [...Array(scale)]
-        .map(ele => {
-          const x = Math.random();
-          const t = 0.7 * x + 0.51 - Math.random() / 50;
-          const y = t > 0.8 ? 1 : 0;
-          return { x: x, y: y };
-        })
-        .sort((a, b) => a.x - b.x);
-
-      return points;
-    };
-
     const points = renderPoints(scale);
     const xs = points.map(p => p.x)
-    const ys = points.map(p => p.y)
-    const ysPre = xs.map(x => sigmoid(w * x + b))
+    const ys = points.map(p => p.y);
+    let ysPre = xs.map(x => x * w);
 
 
     // 绘图
@@ -53,7 +39,7 @@
       mode: 'markers',
       marker: {
         color: 'black',
-        size: 2
+        size: 1.5
       }
     };
     let fittingModel = {
@@ -108,41 +94,22 @@
 
 
     // SGD Adjust
-
-    for (let m = 0; m < 30000; m++) {
-      let count = 0
-
+    let count = 0
+    for (let m = 0; m < 5; m++) {
       points.forEach(p => {
+        const e = p.y - w * p.x;
+        w += e * alpha;
+        ysPre = xs.map(x => x * w);
+
         count++;
 
-        // 引入 sigmoid 激活函数后，模型变为 yPre = sigmoid(w*x+b)
-        // 于是 e = y-sigmoid(w*x+b), E = e**2 （用SGD优化，不必使用所有样本）
-        // 用复合函数求导法则，于是有
-
-        let z = w * p.x + b
-        let a = sigmoid(z)
-        let E = (p.y - a) ** 2
-
-        let dEda = -2 * (p.y - a)
-        let dadz = a * (1 - a)
-        let dzdw = p.x
-        let dzdb = 1
-        let dEdw = dEda * dadz * dzdw
-        let dEdb = dEda * dadz * dzdb
-
-        w -= dEdw * alpha
-        b -= dEdb * alpha
-
-        const ysPre = xs.map(x => sigmoid(w * x + b))
-
-        if ((m+1) % 200 === 0 && count % 100 === 0) {
-
+        if (count % 10 === 0) {
           fittingModel = {
             data: [{ x: xs, y: ysPre, }],
             traces: [1],
             layout: {
               title: {
-                text: `第${m + 1}轮第${count}次迭代，拟合模型为：y=sigmoid(${d3.format(".4f")(w)}x${d3.format(".4f")(b)})`,
+                text: `拟合模型为：y=${d3.format(".4f")(w)}x`,
               },
             },
           };
@@ -156,14 +123,9 @@
               duration: 1
             }
           })
-
         }
-
-
       });
     }
-
-
 
   </script>
 </body>
