@@ -1,16 +1,96 @@
 
 
 [TOC]
-# 神经网络与深度学习
+# JavaScript 深度学习笔记
 
-
+我的：
 
 - GitHub: https://github.com/Humoonruc/deep-learning-notes
-- Pages: https://humoonruc.github.io/deep-learning-notes/
+- Web Pages: https://humoonruc.github.io/deep-learning-notes/
+
+官方：
+
+- [TensorFlow.js | TensorFlow中文官网](https://www.tensorflow.org/js/)
+- 原书 GitHub：[tensorflow/tfjs-examples: Examples built with TensorFlow.js (github.com)](https://github.com/tensorflow/tfjs-examples)
+- 中文版图书资源列表：https://www.ituring.com.cn/article/517040
+- [Chapter 2 CodePens - a Collection by TFJSBook on CodePen](https://codepen.io/collection/Xzwavm/)
 
 <img src="http://humoon-image-hosting-service.oss-cn-beijing.aliyuncs.com/img/typora/JavaScript/image-20210607112416754.png" alt="image-20210607112416754" style="zoom:50%;" />
 
 
+
+## Introduction
+
+### 学科与概念
+
+![image-20210607122634544](../../../../AppData/Roaming/Typora/typora-user-images/image-20210607122634544.png)
+
+#### 人工智能
+
+在一定程度上，是自动化的另一种说法。
+
+#### 机器学习
+
+- 避免硬编码，从已有的数据中寻找映射的规则（回归分析也是一种机器学习），然后使用这种规则用于推断和预测。
+- 当然，模型的类型和基本结构是由人工进行事先约束的，机器学习主要是一个参数优化的过程。
+- 在神经网络之外，其他机器学习方法包括逻辑回归(logistic regression)、决策树等。
+
+![image-20210607122908207](http://humoon-image-hosting-service.oss-cn-beijing.aliyuncs.com/img/typora/JavaScript/image-20210607122908207.png)
+
+#### 神经网络
+
+- 结构上有点类似神经元之间相互作用的一种模型框架
+- 通过连续的数学运算层来转换数据的表示
+- 转换数据的表示是神经网络的核心问题
+
+<img src="http://humoon-image-hosting-service.oss-cn-beijing.aliyuncs.com/img/typora/JavaScript/image-20210607131353623.png" alt="image-20210607131353623" style="zoom: 67%;" />
+
+#### 深度学习
+
+层数很多（前沿模型的层数甚至高达上千层）的神经网络
+
+![image-20210607130331445](http://humoon-image-hosting-service.oss-cn-beijing.aliyuncs.com/img/typora/JavaScript/image-20210607130331445.png)
+
+### 近十年推动深度学习快速普及的因素
+
+#### 硬件
+
+并行计算的 GPU 集群
+
+#### 大数据
+
+互联网和移动互联网的普及，使拥有标记的数据（{数据:答案}逻辑对）指数级增长。
+
+#### 算法改进
+
+更好的激活函数（如 ReLU，线性整流函数）
+
+更好的权重初始化方案
+
+更好的迭代优化方案
+
+### JavaScript 深度学习的优缺点
+
+#### 优势
+
+- 可以运行在浏览器中，简化部署
+- 利用浏览器的 WebGL 接口，调用显卡 GPU 的并行计算功能加速模型训练
+- JavaScript 生态中有最强大、最成熟的可视化方案
+- V8 引擎的强大性能支持，比 Python 快
+
+#### 缺点
+
+浏览器环境性能有限，复杂任务（如机器翻译）所需的超大规模模型的训练必须使用服务器集群和功能全面的后端语言。
+
+### TensorFlow.js
+
+- tensor，张量
+- TensorFLow (Python)，Google 开发的深度学习低阶 API
+- Keras (Python)，深度学习高阶API，提供了常用的神经网络层类型
+- TensorFlow.js
+  - Google 深度学习团队开发
+  - 同时具有低阶和高阶 API，且与 TensorFlow 和 Keras 保持一致
+  - 支持导入和导出 TensorFlow 和 Keras 的深度学习模型
 
 ## 感知机
 
@@ -35,7 +115,7 @@ $$
 h(x)=\frac{1}{1+e^{-x}}
 $$
 
-ReLU（Rectified Linear Unit）函数：
+ReLU（Rectified Linear Unit, 线性整流）函数：
 $$
 h(x) = max(0, x)
 $$
@@ -130,8 +210,4 @@ MBGD 是对 BGD 和 SGD 的一个折中办法。其思想是：每次迭代使�
 误差反向传播算法使梯度下降变得可操作，从理论成为实践。
 
 
-
-
-
-## 卷积神经网络
 
