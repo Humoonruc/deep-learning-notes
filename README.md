@@ -1,18 +1,10 @@
 
 
 [TOC]
-# JavaScript 深度学习笔记
-
-我的：
+# 深度学习基本原理
 
 - GitHub: https://github.com/Humoonruc/deep-learning-notes
 - Web Pages: https://humoonruc.github.io/deep-learning-notes/
-
-官方：
-
-- [TensorFlow.js | TensorFlow中文官网](https://www.tensorflow.org/js/)
-- 原书 GitHub：[tensorflow/tfjs-examples: Examples built with TensorFlow.js (github.com)](https://github.com/tensorflow/tfjs-examples)
-- 中文版图书资源列表：https://www.ituring.com.cn/article/517040
 
 <img src="http://humoon-image-hosting-service.oss-cn-beijing.aliyuncs.com/img/typora/JavaScript/image-20210607112416754.png" alt="image-20210607112416754" style="zoom:50%;" />
 
@@ -42,7 +34,7 @@
 
 <img src="http://humoon-image-hosting-service.oss-cn-beijing.aliyuncs.com/img/typora/JavaScript/image-20210607175143470.png" alt="image-20210607175143470" style="zoom:50%;" />
 
-- 多个神经元联合工作（多个x 交叉产生多个 y）时，就构成了神经网络。因此，
+- 多个神经元联合工作（多个x 交叉产生多个 y）时，就构成了神经网络。
 
 ![image-20210607130331445](http://humoon-image-hosting-service.oss-cn-beijing.aliyuncs.com/img/typora/JavaScript/image-20210607130331445.png)
 
@@ -54,7 +46,7 @@
 
 可以构建多层神经网络，通过连续的数学运算层来转换数据的表示。
 
-深度学习就指层数很多（前沿模型的层数甚至高达上千层）的神经网络模型。
+深度学习指层数很多（前沿模型的层数甚至高达上千层）的神经网络模型。
 
 在深度学习领域，==模型也经常被称为网络==。
 
@@ -92,6 +84,12 @@
 浏览器环境性能有限，复杂任务（如机器翻译）所需的超大规模模型的训练必须使用服务器集群和功能全面的后端语言。
 
 ### TensorFlow.js
+
+[TensorFlow.js | TensorFlow中文官网](https://www.tensorflow.org/js/)
+
+[tensorflow/tfjs-examples: Examples built with TensorFlow.js (github.com)](https://github.com/tensorflow/tfjs-examples)
+
+
 
 - tensor，张量
 - TensorFLow (Python)，Google 开发的深度学习低阶 API

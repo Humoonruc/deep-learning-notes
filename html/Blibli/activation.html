@@ -109,7 +109,7 @@
 
     // SGD Adjust
 
-    for (let m = 0; m < 30000; m++) {
+    for (let m = 0; m < 20000; m++) {
       let count = 0
 
       points.forEach(p => {
@@ -135,7 +135,7 @@
 
         const ysPre = xs.map(x => sigmoid(w * x + b))
 
-        if ((m+1) % 200 === 0 && count % 100 === 0) {
+        if ((m + 1) % 200 === 0 && count % 100 === 0) {
 
           fittingModel = {
             data: [{ x: xs, y: ysPre, }],
