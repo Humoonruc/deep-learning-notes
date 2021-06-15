@@ -2,22 +2,19 @@
 # hidden-layer.R
 #########################################
 
-
 # 引入库和模块==================================================
 
 pacman::p_load(
   tidyverse,
-  lubridate,
   data.table,
-  magrittr,
   plotly,
   htmlwidgets
 )
 
-config <- jsonlite::fromJSON("config.json")
+config <- jsonlite::fromJSON("./06-config.json")
 alpha <- config$alpha
 
-source("./render-data.R") # 引入 data
+source("./06-render-data.R") # 引入 data
 xs <- data$x
 ys <- data$y
 
@@ -139,7 +136,7 @@ for (j in 1:config$m) {
     b1_2 <- b1_2 - alpha * dedb1_2
   }
 
-  # 每10轮运算完成后，更新一次快照
+  # 每20轮运算完成后，更新一次快照
   if (count %% 20000 == 0) {
     status <- forward(xs)
     param_learn <- param_learn %>%
@@ -175,4 +172,4 @@ plot_ly(
   layout(legend = list(
     x = 0.5, y = 1.1, bgcolor = "#ebebeb", xanchor = "center"
   )) %>%
-  saveWidget("./figure/hidden-layer.html", selfcontained = F, libdir = "lib")
+  saveWidget("./06-hidden-layer.html", selfcontained = F, libdir = "lib")
