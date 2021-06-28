@@ -14,7 +14,7 @@
 <body>
 
 
-  <p> loss plot</p>
+  <p> loss function plot</p>
   <div id="lossPlot" class="plots"></div>
   <p> loss surface 2d with traj</p>
   <div id="lossSurface2dWithTraj" class="plots"></div>
@@ -163,6 +163,7 @@
       }
     });
 
+    // 全局变量
     const lossTrace = {
       x: [],
       y: [],
@@ -172,6 +173,7 @@
       size: 18,
       color: "#000000",
     };
+
     function plotLoss(epoch, loss) {
       lossTrace.x.push(epoch);
       lossTrace.y.push(loss);
@@ -187,6 +189,7 @@
           title: 'loss',
           range: [0, 0.31]
         },
+        // 人工做四个箭头标记
         annotations: [{
           x: 1,
           y: .295,
@@ -381,6 +384,7 @@
           title: 'bias',
         },
         showlegend: false,
+        // 手工做箭头标记
         annotations: [{
           x: 0,
           y: 0,
@@ -477,9 +481,11 @@
         epochs: 200,
         callbacks: {
           onEpochEnd: async (epoch, logs) => {
+            // 没有任何技巧，就是不断地重绘这三张图
             plotLoss(epoch + 1, logs.loss);
             plotParams(epoch + 1, k, b);
             recordTrajectory(k, b, logs.loss);
+
             k = model.getWeights()[0].dataSync()[0];
             b = model.getWeights()[1].dataSync()[0];
             if (epoch === 0) {

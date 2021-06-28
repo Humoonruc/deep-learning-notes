@@ -1,33 +1,42 @@
 #########################################
 # hidden-layer.R
+# 手写隐藏层
 #########################################
 
-# 引入库和模块==================================================
 
-pacman::p_load(
-  tidyverse,
-  data.table,
-  plotly,
-  htmlwidgets
-)
+## 引入库、模块和配置文件=============================================
+# 库
+library(tidyverse)
+library(data.table)
+library(magrittr)
+library(plotly)
+library(htmlwidgets)
 
+
+# 配置文件
 config <- jsonlite::fromJSON("./06-config.json")
 alpha <- config$alpha
+scale <- config$scale
+m <- config$m
 
-source("./06-render-data.R") # 引入 data
+
+# 模块
+source("./src/plotly_style.R")
+source("./src/calculate.R")
+source("./06-render-data.R")
+data <- render_points(scale)
 xs <- data$x
 ys <- data$y
 
 
-# 模型设定======================================================
+## 模型设定======================================================
 
 # 整个模型的输入只有一个变量 X
-# 第一层模型有两个神经元，都接受 X 作为输入
-# 第二层模型有一个神经元，接受第一层两个神经元的输入
-# 第二层的神经元的输出为模型输出
+# 隐藏层有两个神经元，都接受 X 作为输入
+# 输出层隐藏层两个神经元的输入
 
 
-# 参数初始化====================================================
+## 参数初始化====================================================
 
 # 数字的表示规则：
 # 1. 第一个数字表示信号来源层的神经元 index
@@ -35,119 +44,107 @@ ys <- data$y
 # 3. 下划线后面数字表示层数
 # 4. 偏置项个数与本层神经元一致，因此下划线之前只有一个数，即本层神经元的 index
 
-## 第一层
-# 第一个神经元
-w11_1 <- runif(1)
-b1_1 <- runif(1)
 
-# 第二个神经元
-w12_1 <- runif(1)
-b2_1 <- runif(1)
+# 从输入层到隐藏层的权重矩阵 W1, dim(W1) = c(2, 1)
+# W1 第一行为 w11_1
+# W1 第二行为 w12_1
+W1 <- runif(2)
+# B1 为列向量 b1_1, b2_1
+B1 <- runif(2)
 
-## 第二层（只有一个神经元）
-w11_2 <- runif(1)
-w21_2 <- runif(1)
-b1_2 <- runif(1)
+# 从隐藏层到输出层的权重矩阵 W2, dim(W2) = c(1, 2)
+# W2 第一行为 w11_2, w21_2
+W2 <- runif(2) %>% t()
+# B2 为标量 b1_2
+B2 <- runif(1)
 
 
-# 前向传播======================================================
+## 前向传播======================================================
 
-sigmoid <- function(x) 1 / (1 + exp(-x))
+forward <- function(x) {
+  X <- matrix(x, nrow = 1)
+  Z1 <- W1 %*% X + B1
+  A1 <- sigmoid(Z1)
+  Z2 <- as.vector(W2 %*% A1) + B2
+  A2 <- sigmoid(Z2)
 
-forward <- function(xs) {
-  z1_1 <- w11_1 * xs + b1_1
-  a1_1 <- sigmoid(z1_1)
-  z2_1 <- w12_1 * xs + b2_1
-  a2_1 <- sigmoid(z2_1)
-  z1_2 <- w11_2 * a1_1 + w21_2 * a2_1 + b1_2
-  a1_2 <- sigmoid(z1_2)
   list(
-    z1_1 = z1_1,
-    a1_1 = a1_1,
-    z2_1 = z2_1,
-    a2_1 = a2_1,
-    z1_2 = z1_2,
-    a1_2 = a1_2
-  ) %>% return()
+    Z1 = Z1,
+    A1 = A1,
+    Z2 = Z2,
+    A2 = A2
+  )
+}
+
+get_y_pre <- function(xs) {
+  xs %>% map_dbl(~ forward(.)$A2)
 }
 
 
-
-# 初始状态======================================================
-
-status <- forward(xs)
-param_learn <- data.table(x = xs, y = status$a1_2, count = rep(0, config$scale))
+## 初始状态======================================================
+ys_pre <- data.table(x = xs, y = get_y_pre(xs), count = 0)
 
 
-# 反向传播======================================================
+## 反向传播======================================================
 count <- 0
 
-for (j in 1:config$m) {
+for (j in 1:m) {
 
   # SGD 梯度下降，随机取样
-  for (i in sample(config$scale)) {
-    count <- count + 1
-
-    x <- xs[i]
-    y <- ys[i]
+  for (i in sample(scale)) {
+    X <- xs[i]
+    Y <- ys[i]
 
     # 用前向传播计算各状态
-    status <- forward(x)
+    status <- forward(X)
+    A1 <- status$A1
+    A2 <- status$A2
 
     # 反向传播的损失函数
-    e <- (y - status$a1_2)^2
+    E <- (Y - A2)^2
 
     # 计算梯度
-    deda1_2 <- -2 * (y - status$a1_2)
+    dEdA2 <- -2 * (Y - A2)
+    dA2dZ2 <- A2 * (1 - A2)
+    dZ2dW2 <- t(A1)
+    dZ2dB2 <- 1
 
-    da1_2dz1_2 <- status$a1_2 * (1 - status$a1_2)
+    dEdW2 <- dEdA2 * dA2dZ2 * dZ2dW2
+    dEdB2 <- dEdA2 * dA2dZ2 * dZ2dB2
 
-    dz1_2dw11_2 <- status$a1_1
-    dz1_2dw21_2 <- status$a2_1
-    dz1_2db1_2 <- 1
 
-    dedw11_2 <- deda1_2 * da1_2dz1_2 * dz1_2dw11_2
-    dedw21_2 <- deda1_2 * da1_2dz1_2 * dz1_2dw21_2
-    dedb1_2 <- deda1_2 * da1_2dz1_2 * dz1_2db1_2
+    dZ2dA1 <- t(W2)
+    dA1dZ1 <- A1 * (1 - A1)
+    dZ1dW1 <- t(X)
+    dZ1dB1 <- 1
 
-    dz1_2da1_1 <- w11_2
-    da1_1dz1_1 <- status$a1_1 * (1 - status$a1_1)
-    dz1_1dw11_1 <- x
-    dz1_1db1_1 <- 1
-
-    dedw11_1 <- deda1_2 * da1_2dz1_2 * dz1_2da1_1 * da1_1dz1_1 * dz1_1dw11_1
-    dedb1_1 <- deda1_2 * da1_2dz1_2 * dz1_2da1_1 * da1_1dz1_1 * dz1_1db1_1
-
-    dz1_2da2_1 <- w21_2
-    da2_1dz2_1 <- status$a2_1 * (1 - status$a2_1)
-    dz2_1dw12_1 <- x
-    dz2_1db2_1 <- 1
-
-    dedw12_1 <- deda1_2 * da1_2dz1_2 * dz1_2da2_1 * da2_1dz2_1 * dz2_1dw12_1
-    dedb2_1 <- deda1_2 * da1_2dz1_2 * dz1_2da2_1 * da2_1dz2_1 * dz2_1db2_1
+    dEdW1 <- (dEdA2 * dA2dZ2 * dZ2dA1 * dA1dZ1) %*% dZ1dW1
+    dEdB1 <- (dEdA2 * dA2dZ2 * dZ2dA1 * dA1dZ1) %*% dZ1dB1
 
     # 梯度下降
-    w11_1 <- w11_1 - alpha * dedw11_1
-    b1_1 <- b1_1 - alpha * dedb1_1
-    w12_1 <- w12_1 - alpha * dedw12_1
-    b2_1 <- b2_1 - alpha * dedb2_1
-    w11_2 <- w11_2 - alpha * dedw11_2
-    w21_2 <- w21_2 - alpha * dedw21_2
-    b1_2 <- b1_2 - alpha * dedb1_2
+    W1 <- W1 - alpha * dEdW1
+    B1 <- B1 - alpha * dEdB1
+    W2 <- W2 - alpha * dEdW2
+    B2 <- B2 - alpha * dEdB2
+
+
+    count <- count + 1
   }
 
-  # 每20轮运算完成后，更新一次快照
-  if (count %% 20000 == 0) {
-    status <- forward(xs)
-    param_learn <- param_learn %>%
-      rbind(data.table(x = xs, y = status$a1_2, count = count))
+  print(str_glue("m = {j}, count = {count}"))
+
+  # 每迭代1000次，记录一次快照
+  if (count %% 1000 == 0) {
+    ys_pre <- bind_rows(
+      ys_pre,
+      data.table(x = xs, y = get_y_pre(xs), count = count)
+    )
   }
-  print(str_c("Learning... Now count = ", count))
 }
 
 
 
-# 绘制动画========================================================
+## 绘制动画========================================================
 
 plot_ly(
   x = xs,
@@ -159,7 +156,7 @@ plot_ly(
   line = list(width = 0)
 ) %>%
   add_trace(
-    data = param_learn,
+    data = ys_pre,
     x = ~x,
     y = ~y,
     frame = ~count,
@@ -169,7 +166,5 @@ plot_ly(
     line = list(color = "red", width = 2),
     marker = list(color = "red", size = 0.1)
   ) %>%
-  layout(legend = list(
-    x = 0.5, y = 1.1, bgcolor = "#ebebeb", xanchor = "center"
-  )) %>%
-  saveWidget("./06-hidden-layer.html", selfcontained = F, libdir = "lib")
+  plotly_style() %>%
+  saveWidget("./figure/06-hidden-layer.html", FALSE, "lib")

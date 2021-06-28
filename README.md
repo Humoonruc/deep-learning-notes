@@ -115,9 +115,7 @@ forward pass: 将x输入模型获得y_pre的过程
 
 ### 激活函数 activation function
 
-感知机的输出是一个阶跃函数。激活函数用平滑的 sigmoid 函数或 ReLU 函数对阶跃函数进行改造，然后发给下一个神经元。
-
-==为了发挥叠加层的优势，激活函数不能用线性函数==。
+感知机的输出是一个阶跃函数。激活函数用平滑的 sigmoid 函数或 ReLU 函数对阶跃函数进行改造，然后发给下一个神经元。==为了发挥叠加层的优势，激活函数不能用线性函数==。
 
 sigmoid 函数：
 $$
@@ -130,6 +128,32 @@ h(x) = max(0, x)
 $$
 
 多层感知机+平滑激活函数就形成了神经网络。
+
+### 类型分割线
+
+一元线性函数经过 sigmoid 函数的转换，在x-y坐标系中会显示为 S 型曲线；二元线性函数在三维直角坐标系中表现为二维平面，被 sigmoid 函数转换后会成为 S 型曲面。
+
+曲面上z=0.5的点，投影到x-y平面上，是一条直线，称为类型分割线。该线的两边，z 值分别大于和小于0.5
+
+但如果样本中 z 值大于和小于 0.5 的点无法用一条直线分开，便称为线性不可分问题，必须增加神经网络的层数，扭曲sigmoid曲面为更加复杂的形状，从而类型分割线也会扭曲为曲线。
+
+<img src="http://humoon-image-hosting-service.oss-cn-beijing.aliyuncs.com/img/typora/JavaScript/image-20210618131516383.png" alt="image-20210618131516383" style="zoom:50%;" />
+
+
+
+如图，单层两个神经元，即可处理可以被一条直线型类型分割线分开的样本。
+
+<img src="http://humoon-image-hosting-service.oss-cn-beijing.aliyuncs.com/img/typora/JavaScript/image-20210618133303940.png" alt="image-20210618133303940" style="zoom: 50%;" />
+
+
+
+线性不可分的样本。用两层神经网络，隐藏层3个神经元，即可处理内外圆环型分布的样本。
+
+![image-20210618134056811](http://humoon-image-hosting-service.oss-cn-beijing.aliyuncs.com/img/typora/JavaScript/image-20210618134056811.png)
+
+两层，隐藏层4个神经元，才能处理花瓣型分布的样本。
+
+![image-20210618133840866](http://humoon-image-hosting-service.oss-cn-beijing.aliyuncs.com/img/typora/JavaScript/image-20210618133840866.png)
 
 ### 回归问题
 
