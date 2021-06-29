@@ -13,17 +13,16 @@
 
 <body>
   <h1>data space with 4 lines</h1>
-  <div id="dataSpaceWith4Lines" class="plots"></div>
+  <div id="plotArea" class="plots"></div>
 
   <script type="module">
 
     import { trainData, testData, trainTensors, testTensors } from './data.js'
 
-
     //--------------可视化部分---------------
 
     // 图像初始化
-    const dataTraceTrain = {
+    const trainTrace = {
       x: trainData.sizeMB,
       y: trainData.timeSec,
       name: 'trainData',
@@ -31,7 +30,7 @@
       type: 'scatter',
       marker: { symbol: "circle", size: 8 }
     };
-    const dataTraceTest = {
+    const testTrace = {
       x: testData.sizeMB,
       y: testData.timeSec,
       name: 'testData',
@@ -39,9 +38,9 @@
       type: 'scatter',
       marker: { symbol: "triangle-up", size: 10 }
     };
-    // 表示只训练10轮的trace
-    // type: lines 只需给出两端坐标，plotly 自动画线
-    const dataTrace10Epochs = {
+    // 表示训练10轮的trace
+    // mode: "lines" 只需给出两端坐标，plotly 自动画线
+    const trace10Epochs = {
       x: [0, 2],
       y: [0, 0.01],
       name: 'model after N epochs',
@@ -49,7 +48,7 @@
       line: { color: 'blue', width: 1, dash: 'dot' },
     };
     // 训练20轮
-    const dataTrace20Epochs = {
+    const trace20Epochs = {
       x: [0, 2],
       y: [0, 0.03],
       name: 'model after N epochs',
@@ -57,7 +56,7 @@
       line: { color: 'green', width: 2, dash: 'dash' }
     };
     // 训练100轮
-    const dataTrace100Epochs = {
+    const trace100Epochs = {
       x: [0, 2],
       y: [0, 0.05],
       name: 'model after N epochs',
@@ -65,7 +64,7 @@
       line: { color: 'red', width: 3, dash: 'longdash' }
     };
     // 训练200轮
-    const dataTrace200Epochs = {
+    const trace200Epochs = {
       x: [0, 2],
       y: [0, 0.1],
       name: 'model after N epochs',
@@ -73,11 +72,11 @@
       line: { color: 'black', width: 4, dash: 'solid' }
     };
 
-    const dataSet = [dataTraceTrain, dataTraceTest, dataTrace10Epochs, dataTrace20Epochs, dataTrace100Epochs, dataTrace200Epochs];
+    const dataSet = [trainTrace, testTrace, trace10Epochs, trace20Epochs, trace100Epochs, trace200Epochs];
     const layout = {
       // ggplot2 风格
       width: 700,
-      title: 'Model fit result',
+      title: 'Model Fit Result',
       xaxis: {
         title: 'size (MB)',
         zeroline: false,
@@ -95,55 +94,56 @@
       plot_bgcolor: '#ebebeb',
       editable: true,
     };
-    Plotly.newPlot('dataSpaceWith4Lines', dataSet, layout);
+    Plotly.newPlot('plotArea', dataSet, layout);
 
 
-    // 更新 plotly 图像的函数
-    function updateScatterWithLines(dataTrace, k, b, N, traceIndex) {
+    /** 更新 plotly 图像的函数
+     * @param  {Object} dataTrace - 要更新的 trace
+     * @param  {Number} k - 权重系数
+     * @param  {Number} b - 偏置
+     * @param  {Number} N - epoch
+     * @param  {Number} traceIndex - 初始化图形时 trace 的 index
+     */
+    function updatePlot(dataTrace, k, b, N, traceIndex) {
+      // 更新模型的参数
+      // 线性变换 y=kx+b, k 称为 kernel, b 称为 bias, k 和 b 统称为 weights
       dataTrace.x = [0, 10];
       dataTrace.y = [b, b + (k * 10)];
+
       let update = {
         x: [dataTrace.x],
         y: [dataTrace.y],
         name: 'model after ' + N + ' epochs'
-      }
-      // plotly.restyle() 方法，更新图像
-      // traceIndex 即生成图像时的第几个trace
-      Plotly.restyle('dataSpaceWith4Lines', update, traceIndex);
+      };
+
+      Plotly.restyle('plotArea', update, traceIndex);
     }
 
 
     //--------------深度学习部分---------------
 
-    // 1. 建立(construct)模型
+    // 1. Construct Model
     const model = tf.sequential();
 
-    // tf.layers.dense() 建立了一个密集层
-    // 线性变换 y=kx+b, k 称为 kernel, b 称为 bias, k 和 b 统称为 weights
-    // 根据本例的数据结构：标量x经过变换成为标量y
+    // tf.layers.dense() 建立了一个密集层：标量x经过变换成为标量y
     model.add(tf.layers.dense({
-      inputShape: [1], // 密集层输入张量X的size（长度为1的1维张量）。假如是一个图片分类的任务，如图片的像素是28*28，深度为1，则inputShepe的值就会是[28, 28, 1]
-      units: 1, // units属性设定输出的size，也设为1
+      inputShape: [1], // 输入张量X的size（长度为1的1维张量）。假如是一个图片分类的任务，图片的像素是28*28，每个像素记录灰度值，则inputShepe的值就会是[28, 28, 1]
+      units: 1, // 唯一一层神经元的数目
     }));
 
 
-    // 2. model.compile() 编译模型
-    // 需要两项配置：损失函数(loss function)和优化器(optimizer)
-    // 损失函数即评价模型不佳程度的统计量
-    // 优化器是迭代参数的算法
-    const optimizer = tf.train.sgd(0.0005); // 指定优化器: SGD方法，每次取一个数据
-    // alpha = 0.0005，很小，故意优化得慢一点来可视化这个过程
+    // 2. Compile Model
+    // 指定优化器: SGD方法, alpha = 0.0005，很小，故意优化得慢一点来可视化这个过程
     // const optimizer = 'sgd'; // 优化器的简写 
-    const lossFunction = 'meanAbsoluteError' // 指定损失函数为 error 的绝对值的平均值（因本例使用SGD优化，每次迭代只用一个值，事实上没有求平均的步骤）
-    // 用伪代码表示即 lossFunction = average(absolute(k*x+b-y))
-    model.compile({ optimizer: optimizer, loss: lossFunction });
+    // 指定损失函数为 error 的绝对值的平均值，用伪代码表示即 lossFunction = average(absolute(k*x+b-y))
+    model.compile({ optimizer: tf.train.sgd(0.0005), loss: 'meanAbsoluteError' });
 
 
-    // 3. model.setWeights() 设定模型参数初始值
+    // 3. model.setWeights() 设定模型参数初始值，这一步也可以没有
     let k = 0;
     let b = 0;
     // 在模型 Y=KX+B 中，K为二维张量（矩阵），B为一维张量（向量）
-    // tf.tensor2d()即创建二维张量（矩阵）的函数，第一个参数为矩阵按行展开的数组，第二个参数表示矩阵的规模(1*1)
+    // tf.tensor2d()即创建二维张量（矩阵）的函数，第一个参数为矩阵按行展开的数组，第二个参数表示矩阵的规模
     // tf.tensor1d()为创建一维张量（向量）的函数，第一个参数为表示向量的数组，不需要第二个参数
     model.setWeights([tf.tensor2d([k], [1, 1]), tf.tensor1d([b])]);
 
@@ -151,30 +151,30 @@
     // 4. model.fit() 训练模型
     (async () => {
       await model.fit(
-        trainTensors.sizeMB, // 训练集输入张量，为(20*1)的二维张量（矩阵）
-        trainTensors.timeSec, // 训练集输出张量，也是(20*1)的二维张量（矩阵）
-        { // 配置对象
+        trainTensors.sizeMB, // 训练集输入张量
+        trainTensors.timeSec, // 训练集输出张量
+        { // 配置训练的参数
           epochs: 200, // 进行多少轮训练
           // 针对不同事件的回调对象
           callbacks: {
             onEpochEnd: async (epoch, logs) => {
-              // 每轮训练结束，获取新的 k 和 b
+              // 每轮训练结束，获取最新的 k 和 b
               k = model.getWeights()[0].dataSync()[0];
               b = model.getWeights()[1].dataSync()[0];
               // console.log(`epoch ${epoch}`);
               if (epoch === 9) {
                 // 在第10轮结束时，更新第一条线(原图的第三个trace)
-                updateScatterWithLines(dataTrace10Epochs, k, b, 10, 2);
+                updatePlot(trace10Epochs, k, b, 10, 2);
               }
               if (epoch === 19) {
                 // 在第20轮结束时，更新第二条线(原图的第四个trace)
-                updateScatterWithLines(dataTrace20Epochs, k, b, 20, 3);
+                updatePlot(trace20Epochs, k, b, 20, 3);
               }
               if (epoch === 99) {
-                updateScatterWithLines(dataTrace100Epochs, k, b, 100, 4);
+                updatePlot(trace100Epochs, k, b, 100, 4);
               }
               if (epoch === 199) {
-                updateScatterWithLines(dataTrace200Epochs, k, b, 200, 5);
+                updatePlot(trace200Epochs, k, b, 200, 5);
               }
               await tf.nextFrame();
             }
@@ -186,7 +186,8 @@
       model.evaluate(testTensors.sizeMB, testTensors.timeSec).print()
 
       // 6. model.predict() 用模型预测
-      // 该方法一次可以预测一组样本，但这组样本需要封装为一个比单次输入维度更高的张量
+      // 该方法一次可以预测一组样本，样本中的每个数据要符合 inputShape 规定的 size
+      // 从而这组样本需要封装为一个比单次输入维度更高的张量
       model.predict(tf.tensor2d([[7.8], [1.2], [13.5]])).print()
     })();
 
