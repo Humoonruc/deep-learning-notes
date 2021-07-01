@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rosenblatt感知机的静态结果</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.7.0/d3.min.js"></script>
+</head>
+
+<body>
+  <p></p>
+  <div id="plot" style="width:60%;height:500px;"></div>
+
+  <script type="module">
+    import { w, xs, ys, ysPre } from './01-Rosenblatt.js';
+    import { layout } from './src/plotlyStyle.js'
+
+    document.querySelector('p').textContent = `拟合模型为：y=${d3.format(".4f")(w)}x`;
+
+    const trainingSet = {
+      x: xs,
+      y: ys,
+      name: '训练集',
+      mode: 'markers',
+      marker: {
+        color: 'black',
+        size: 1
+      }
+    };
+    const fittingModel = {
+      x: xs,
+      y: ysPre,
+      name: '拟合模型',
+      mode: 'lines+markers',
+      marker: {
+        color: 'red',
+        size: 2
+      }
+    };
+    const dataSet = [trainingSet, fittingModel];
+    layout.title.text = 'Rosenblatt 感知机训练完毕的状态';
+    Plotly.newPlot("plot", dataSet, layout);
+
+  </script>
+</body>
+
+</html>

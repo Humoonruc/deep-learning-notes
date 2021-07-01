@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activation Function</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.7.0/d3.min.js"></script>
+</head>
+
+<body>
+  <h2 id="h2">Sigmoid 激活函数, SGD 优化</h2>
+  <div id="plot" style="width:60%;height:500px;"></div>
+  <script type="module">
+
+    // module
+    import { layout } from './src/plotlyStyle.js'
+    import { sigmoid, sample } from './src/calculate.js'
+
+    // config
+    const scale = 100;
+    const alpha = 0.03;
+    const m = 50000
+
+
+    // initial
+    let w = 0.1
+    let b = 0.1
+
+    // data
+    function renderPoints(scale) {
+      const xs = [...Array(scale)].map(d => Math.random()).sort()
+      const ys = xs.map(x => (0.7 * x + 0.51 - Math.random() / 50) > 0.8 ? 1 : 0)
+      return { xs: xs, ys: ys };
+    };
+
+    const points = renderPoints(scale);
+    const xs = points.xs;
+    const ys = points.ys;
+
+
+    // 初始化绘图
+    const trainingSet = {
+      x: xs,
+      y: ys,
+      name: '训练集',
+      mode: 'markers',
+      marker: {
+        color: 'black',
+        size: 3
+      }
+    };
+    let fittingModel = {
+      x: xs,
+      y: xs.map(x => sigmoid(w * x + b)),
+      name: '拟合模型',
+      mode: 'lines+markers',
+      marker: {
+        color: 'red',
+        size: 2
+      }
+    };
+    const dataSet = [trainingSet, fittingModel];
+    // layout.title.text = `拟合模型为：y=${d3.format(".4f")(w)}x`
+    Plotly.newPlot('plot', dataSet, layout);
+
+
+    
+
+    for (let j of d3.range(0, m)) {
+      let count = 0
+
+      // SGD Adjust
+      for (let i of sample(scale)) {
+
+        // 引入 sigmoid 激活函数后，模型变为 yPre = sigmoid(w*x+b)
+        // 于是 e = y-sigmoid(w*x+b), E = e**2 （用SGD优化，不必使用所有样本）
+        // 用复合函数求导法则，于是有
+
+        const x = xs[i]
+        const y = ys[i]
+
+        let z = w * x + b
+        let a = sigmoid(z)
+        let E = (y - a) ** 2
+
+        let dEda = -2 * (y - a)
+        let dadz = a * (1 - a)
+        let dzdw = x
+        let dzdb = 1
+        let dEdw = dEda * dadz * dzdw
+        let dEdb = dEda * dadz * dzdb
+
+        w = w - dEdw * alpha
+        b = b - dEdb * alpha
+        count++;
+
+
+
+        if ((j + 1) % 200 === 0 && count % 100 === 0) {
+          fittingModel = {
+            data: [{ x: xs, y: xs.map(x => sigmoid(w * x + b)) }],
+            traces: [1],
+            layout: {
+              title: {
+                text: `第${j + 1}轮第${count}次迭代，拟合模型为：y=sigmoid(${d3.format(".4f")(w)}x${d3.format(".4f")(b)})`,
+              },
+            },
+          };
+
+          Plotly.animate('plot', fittingModel, {
+            transition: { duration: 1 },
+            frame: { duration: 1 }
+          })
+        }
+
+      }
+    }
+
+  </script>
+</body>
+
+</html>
