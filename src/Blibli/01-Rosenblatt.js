@@ -4,6 +4,7 @@
  */
 
 import { renderPoints } from './01-renderRandomData.js';
+import { sample } from './src/calculate.js';
 
 // config
 const scale = 1000;
@@ -19,8 +20,8 @@ const ys = points.ys;
 
 
 // SGD adjust
-for (let j = 0; j < m; j++) {
-  for (let i = 0; i < scale; i++) {
+for (let j of d3.range(0, m)) {
+  for (let i of sample(scale)) {
     const e = ys[i] - w * xs[i];
     w = w + e * alpha;
   }

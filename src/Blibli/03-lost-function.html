@@ -5,18 +5,19 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>一元损失函数的损失平面</title>
+  <title>无截距项一元回归模型损失函数的可视化——损失曲线</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.7.0/d3.min.js"></script>
 </head>
 
 <body>
-  <h2 id="h2">一元损失函数（无常数项 b）的损失平面, BGD优化</h2>
+  <h2 id="h2">一元回归模型的损失曲线：无截距项, BGD 优化（BGD 收敛的速度比 SGD 快得多）</h2>
   <div id="plot" style="width:60%;height:500px;"></div>
   <script type="module">
 
     import { renderPoints } from './01-renderRandomData.js';
     import { layout } from './src/plotlyStyle.js'
+    import { sample } from './src/calculate.js';
 
     // config
     const scale = 1000;
@@ -66,14 +67,14 @@
       }
     };
     const dataSet = [possibleSpace, searchMin];
-    layout.title.text = `模型参数为：${d3.format(".4f")(w)}`
+    layout.title.text = `模型参数 w = ${d3.format(".4f")(w)}`
     Plotly.newPlot("plot", dataSet, layout);
 
 
     // BGD Adjust, BGD 收敛的速度比 SGD 快得多
     for (let j of d3.range(0, m)) {
 
-      for (let i of d3.range(0, scale)) {
+      for (let i of sample(scale)) {
         // 梯度下降
         w += -(2 / scale) * (sumXX * w - sumXY) * alpha;
 
@@ -83,7 +84,7 @@
           traces: [1],
           layout: {
             title: {
-              text: `模型参数为：${d3.format(".4f")(w)}`,
+              text: `模型参数 w = ${d3.format(".4f")(w)}`,
             },
           },
         };

@@ -5,21 +5,22 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rosenblatt感知机迭代过程的可视化</title>
+  <title>一元回归模型：无截距项的训练过程</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.7.0/d3.min.js"></script>
 </head>
 
 <body>
-  <h2>Rosenblatt 感知机 SGD 迭代过程的可视化</h2>
+  <h2>一元回归模型：无截距项，SGD 优化</h2>
   <div id="plot" style="width:60%;height:500px;"></div>
 
   <script type="module">
     import { renderPoints } from './01-renderRandomData.js';
     import { layout } from './src/plotlyStyle.js'
+    import { sample } from './src/calculate.js';
 
     // config
-    const scale = 1000;
+    const scale = 500;
     const alpha = 0.03;
     const m = 5;
     let w = 0.5; // 定义模型参数的初始值
@@ -63,7 +64,8 @@
     for (let j of d3.range(0, m)) {
 
       // SGD Adjust
-      for (let i = 0; i < scale; i++) {
+      for (let i of sample(scale)) {
+        count++;
 
         const x = xs[i]
         const y = ys[i]
@@ -78,7 +80,7 @@
             traces: [1],
             layout: {
               title: {
-                text: `拟合模型为：y=${d3.format(".4f")(w)}x`,
+                text: `第${count}次迭代, 拟合模型为：y=${d3.format(".4f")(w)}x`,
               },
             },
           };
@@ -93,7 +95,6 @@
           })
         }
 
-        count++;
       }
     }
 

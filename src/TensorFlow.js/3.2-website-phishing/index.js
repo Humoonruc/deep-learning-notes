@@ -17,7 +17,7 @@
 
 import * as tf from '@tensorflow/tfjs';
 
-import {WebsitePhishingDataset} from './data';
+import { WebsitePhishingDataset } from './data';
 import * as ui from './ui';
 import * as utils from './utils';
 
@@ -26,8 +26,8 @@ function falsePositives(yTrue, yPred) {
     const one = tf.scalar(1);
     const zero = tf.scalar(0);
     return tf.logicalAnd(yTrue.equal(zero), yPred.equal(one))
-        .sum()
-        .cast('float32');
+      .sum()
+      .cast('float32');
   });
 }
 
@@ -35,8 +35,8 @@ function trueNegatives(yTrue, yPred) {
   return tf.tidy(() => {
     const zero = tf.scalar(0);
     return tf.logicalAnd(yTrue.equal(zero), yPred.equal(zero))
-        .sum()
-        .cast('float32');
+      .sum()
+      .cast('float32');
   });
 }
 
@@ -64,7 +64,7 @@ function falsePositiveRate(yTrue, yPred) {
 function drawROC(targets, probs, epoch) {
   return tf.tidy(() => {
     const thresholds = [
-      0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,  0.45, 0.5,  0.55,
+      0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55,
       0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.92, 0.94, 0.96, 0.98, 1.0
     ];
     const tprs = [];  // True positive rates.
@@ -102,11 +102,14 @@ data.loadData().then(async () => {
   await ui.updateStatus('Building model...');
   const model = tf.sequential();
   model.add(tf.layers.dense(
-      {inputShape: [data.numFeatures], units: 100, activation: 'sigmoid'}));
-  model.add(tf.layers.dense({units: 100, activation: 'sigmoid'}));
-  model.add(tf.layers.dense({units: 1, activation: 'sigmoid'}));
-  model.compile(
-      {optimizer: 'adam', loss: 'binaryCrossentropy', metrics: ['accuracy']});
+    { inputShape: [data.numFeatures], units: 100, activation: 'sigmoid' }));
+  model.add(tf.layers.dense({ units: 100, activation: 'sigmoid' }));
+  model.add(tf.layers.dense({ units: 1, activation: 'sigmoid' }));
+  model.compile({
+    optimizer: 'adam',
+    loss: 'binaryCrossentropy',
+    metrics: ['accuracy']
+  });
 
   const trainLogs = [];
   let auc;
@@ -120,7 +123,7 @@ data.loadData().then(async () => {
       onEpochBegin: async (epoch) => {
         // Draw ROC every a few epochs.
         if ((epoch + 1) % 100 === 0 || epoch === 0 || epoch === 2 ||
-            epoch === 4) {
+          epoch === 4) {
           const probs = model.predict(testData.data);
           auc = drawROC(testData.target, probs, epoch);
         }
@@ -137,7 +140,7 @@ data.loadData().then(async () => {
   await ui.updateStatus('Running on test data...');
   tf.tidy(() => {
     const result =
-        model.evaluate(testData.data, testData.target, {batchSize: batchSize});
+      model.evaluate(testData.data, testData.target, { batchSize: batchSize });
 
     const lastTrainLog = trainLogs[trainLogs.length - 1];
     const testLoss = result[0].dataSync()[0];
@@ -147,21 +150,18 @@ data.loadData().then(async () => {
     const predictions = utils.binarize(probs).as1D();
 
     const precision =
-        tf.metrics.precision(testData.target, predictions).dataSync()[0];
+      tf.metrics.precision(testData.target, predictions).dataSync()[0];
     const recall =
-        tf.metrics.recall(testData.target, predictions).dataSync()[0];
+      tf.metrics.recall(testData.target, predictions).dataSync()[0];
     const fpr = falsePositiveRate(testData.target, predictions).dataSync()[0];
     ui.updateStatus(
-        `Final train-set loss: ${lastTrainLog.loss.toFixed(4)} accuracy: ${
-            lastTrainLog.acc.toFixed(4)}\n` +
-        `Final validation-set loss: ${
-            lastTrainLog.val_loss.toFixed(
-                4)} accuracy: ${lastTrainLog.val_acc.toFixed(4)}\n` +
-        `Test-set loss: ${testLoss.toFixed(4)} accuracy: ${
-            testAcc.toFixed(4)}\n` +
-        `Precision: ${precision.toFixed(4)}\n` +
-        `Recall: ${recall.toFixed(4)}\n` +
-        `False positive rate (FPR): ${fpr.toFixed(4)}\n` +
-        `Area under the curve (AUC): ${auc.toFixed(4)}`);
+      `Final train-set loss: ${lastTrainLog.loss.toFixed(4)} accuracy: ${lastTrainLog.acc.toFixed(4)}\n` +
+      `Final validation-set loss: ${lastTrainLog.val_loss.toFixed(
+        4)} accuracy: ${lastTrainLog.val_acc.toFixed(4)}\n` +
+      `Test-set loss: ${testLoss.toFixed(4)} accuracy: ${testAcc.toFixed(4)}\n` +
+      `Precision: ${precision.toFixed(4)}\n` +
+      `Recall: ${recall.toFixed(4)}\n` +
+      `False positive rate (FPR): ${fpr.toFixed(4)}\n` +
+      `Area under the curve (AUC): ${auc.toFixed(4)}`);
   });
 });

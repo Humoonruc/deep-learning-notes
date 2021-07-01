@@ -5,13 +5,13 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>multiple-input</title>
+  <title>二元二分类模型：线性可分数据、单层模型的训练过程</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.7.0/d3.min.js"></script>
 </head>
 
 <body>
-  <h2 id="h2">二元输入, SGD 优化</h2>
+  <h2 id="h2">二元二分类模型：线性可分数据，单层模型, SGD 优化</h2>
   <div id="3D" style="width:80%;height:500px;"></div>
 
   <script type="module">
@@ -138,7 +138,7 @@
             traces: [1],
             layout: {
               title: {
-                text: `第${j + 1}轮${count}次迭代，拟合模型为：y=sigmoid(${d3.format(".4f")(w1)}x1 ${d3.format(".4f")(w2)}x2 ${d3.format(".4f")(b)})`,
+                text: `第${j + 1}轮${count}次迭代，拟合模型为：z=sigmoid(${d3.format(".4f")(w1)}x+${d3.format(".4f")(w2)}y${d3.format(".4f")(b)})`,
               },
             },
           };

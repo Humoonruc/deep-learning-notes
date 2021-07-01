@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Loss surface contour plot</title>
+  <title>一元回归模型的训练过程</title>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <link rel="stylesheet" href="../css/style.css">
@@ -249,10 +249,12 @@
     const kTrace = {
       x: [],
       y: [],
+      name: "k"
     };
     const bTrace = {
       x: [],
       y: [],
+      name: "b"
     }
 
     function plotParams(epoch, k, b) {
@@ -264,7 +266,10 @@
         width: 400,
         xaxis: {
           title: 'epoch #',
-        }
+        },
+        yaxis: {
+          title: 'params',
+        },
       });
     }
 
@@ -274,7 +279,7 @@
       inputShape: [1],
     }));
     model.summary();
-    const optimizer = tf.train.sgd(0.0005);
+    const optimizer = tf.train.sgd(0.0005); // 一个超级小的学习率，为了看清楚梯度下降的过程
     model.compile({ loss: 'meanAbsoluteError', optimizer: optimizer });
 
     const landscape = {

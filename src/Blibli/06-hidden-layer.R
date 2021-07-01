@@ -82,7 +82,7 @@ get_y_pre <- function(xs) {
 
 
 ## 初始状态======================================================
-ys_pre <- data.table(x = xs, y = get_y_pre(xs), count = 0)
+ys_pre <- data.table(x = xs, y = get_y_pre(xs), epoch = 0)
 
 
 ## 反向传播======================================================
@@ -133,11 +133,11 @@ for (j in 1:m) {
 
   print(str_glue("m = {j}, count = {count}"))
 
-  # 每迭代1000次，记录一次快照
-  if (count %% 1000 == 0) {
+  # 每迭代10轮，记录一次快照
+  if (j %% 10 == 0) {
     ys_pre <- bind_rows(
       ys_pre,
-      data.table(x = xs, y = get_y_pre(xs), count = count)
+      data.table(x = xs, y = get_y_pre(xs), epoch = j)
     )
   }
 }
@@ -159,7 +159,7 @@ plot_ly(
     data = ys_pre,
     x = ~x,
     y = ~y,
-    frame = ~count,
+    frame = ~epoch,
     name = "fitted",
     type = "scatter",
     mode = "lines",
