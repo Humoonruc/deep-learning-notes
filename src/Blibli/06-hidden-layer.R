@@ -24,9 +24,9 @@ m <- config$m
 source("./src/plotly_style.R")
 source("./src/calculate.R")
 source("./06-render-data.R")
-data <- render_points(scale)
-xs <- data$x
-ys <- data$y
+data <- render_data_2(scale)
+xs <- data$X
+ys <- data$Y
 
 
 ## 模型设定======================================================
@@ -147,10 +147,10 @@ for (j in 1:m) {
 ## 绘制动画========================================================
 
 plot_ly(
+  type = "scatter",
   x = xs,
   y = ys,
   name = "train_set",
-  type = "scatter",
   mode = "markers",
   marker = list(color = "royalblue", opacity = 0.5, size = 5),
   line = list(width = 0)
@@ -161,10 +161,9 @@ plot_ly(
     y = ~y,
     frame = ~epoch,
     name = "fitted",
-    type = "scatter",
     mode = "lines",
     line = list(color = "red", width = 2),
     marker = list(color = "red", size = 0.1)
   ) %>%
   plotly_style() %>%
-  saveWidget("./figure/06-hidden-layer.html", FALSE, "lib")
+  saveWidget("./figure/manual-hidden-layer.html", FALSE, "lib")

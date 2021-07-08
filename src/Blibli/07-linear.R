@@ -20,7 +20,7 @@ scale <- config$scale
 # 引入函数脚本
 source("./src/calculate.R")
 source("./07-plotly-3d.R")
-source("./07-render-data.R")
+source("./08-render-data.R")
 data <- render_data_linear(scale)
 
 
@@ -33,13 +33,9 @@ B <- 0.3
 forward <- function(X) {
   Z <- W %*% X + B
   A <- sigmoid(Z)
-  return(A)
+  A %>% as.vector()
 }
 
-
-# 初始状态绘图
-mesh_3d(data, forward) %>%
-  saveWidget("./figure/linear-initial.html", FALSE, "lib", title = "initial")
 
 count <- 0
 
@@ -49,7 +45,7 @@ for (j in 1:m) {
   for (i in sample(scale)) {
 
     # 用前向传播计算状态
-    X <- data$X[[i]]
+    X <- c(data$X1[i], data$X2[i])
     Y <- data$Y[[i]]
     A <- forward(X)
     E <- (Y - A)^2
@@ -77,5 +73,8 @@ for (j in 1:m) {
 }
 
 
+surface_3d(data, forward) %>%
+  saveWidget("./figure/manual-linear-surface.html", FALSE, "lib")
+
 mesh_3d(data, forward) %>%
-  saveWidget("./figure/linear-final.html", FALSE, "lib", title = "final")
+  saveWidget("./figure/manual-linear-mesh.html", FALSE, "lib")

@@ -21,8 +21,8 @@ scale <- config$scale
 
 # 引入函数脚本
 source("./src/calculate.R")
-source("./07-render-data.R")
 source("./07-plotly-3d.R")
+source("./08-render-data.R")
 data <- render_data_circle(scale)
 
 
@@ -79,12 +79,6 @@ get_Y_pre <- function(X) {
   forward(X)$A2
 }
 
-
-# 初始状态绘图
-mesh_3d(data, get_Y_pre) %>%
-  saveWidget("./figure/circle-initial.html", FALSE, "lib", title = "initial")
-
-
 ## 反向传播======================================================
 count <- 0
 
@@ -93,7 +87,7 @@ for (j in 1:m) {
 
   # SGD 梯度下降，随机取样
   for (i in sample(scale)) {
-    X <- data$X[[i]]
+    X <- c(data$X1[i], data$X2[i])
     Y <- data$Y[[i]]
 
     # 用前向传播计算各状态
@@ -137,7 +131,8 @@ for (j in 1:m) {
   cat(str_c("count = ", count, "\n"))
 }
 
-
+surface_3d(data, get_Y_pre) %>%
+  saveWidget("./figure/manual-circle-surface.html", FALSE, "lib")
 
 mesh_3d(data, get_Y_pre) %>%
-  saveWidget("./figure/circle-final.html", FALSE, "lib", title = "final")
+  saveWidget("./figure/manual-circle-mesh.html", FALSE, "lib")

@@ -20,26 +20,16 @@ source("./06-render-data.R")
 
 data1 <- render_data_1(scale)
 
+
 # 构建模型
 model <- keras_model_sequential()
-
-# 模型结构设定
 model %>%
-  # 第一层神经网络
-  ## layer_dense(units = 2, activation = "sigmoid") %>%
-  # 第二层神经网络
-  # 第一层神经网络必须有 input_shape 参数
   layer_dense(units = 1, activation = "sigmoid", input_shape = 1)
-
-
-# 设置模型
 model %>% compile(
-  optimizer = optimizer_sgd(lr = alpha), # 优化器
+  optimizer = optimizer_adam(lr = alpha), # 优化器
   loss = "mean_squared_error", # 损失函数
   metrics = c("accuracy")
 )
-
-# 训练模型
 model %>% fit(
   data1$X, data1$Y,
   epochs = m,
@@ -70,7 +60,7 @@ model %>%
 
 # 设置模型
 model %>% compile(
-  optimizer = optimizer_sgd(lr = alpha), # 优化器
+  optimizer = optimizer_adam(lr = alpha), # 优化器
   loss = "mean_squared_error", # 损失函数
   metrics = c("accuracy")
 )
