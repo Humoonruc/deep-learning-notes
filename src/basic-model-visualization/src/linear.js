@@ -1,5 +1,5 @@
 /**
- * @file 二元线性可分数据的分类问题
+ * @file 二元线性可分数据的二分类问题
  */
 
 
@@ -85,10 +85,10 @@ function updatePlot(plotDivId, traceIndex, plotTitle, N) {
 
   Plotly.animate(plotDivId, newStatus, {
     transition: {
-      duration: 1,
+      duration: 10,
     },
     frame: {
-      duration: 1,
+      duration: 10,
     }
   });
 }

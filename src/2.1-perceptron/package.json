@@ -21,10 +21,6 @@
     "webpack-dev-server": "^3.11.2",
     "xml-loader": "^1.2.1"
   },
-  "dependencies": {
-    "@tensorflow/tfjs": "^3.7.0",
-    "@tensorflow/tfjs-node": "^3.7.0"
-  },
   "main": "webpack.config.js",
   "description": ""
 }
